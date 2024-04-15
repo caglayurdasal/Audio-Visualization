@@ -16,7 +16,7 @@ def main():
     r = sr.Recognizer()
     energy_threshold = [
         r.energy_threshold
-    ]  # cvui.trackbar() expects the aValue parameter to be a mutable object
+    ]  # cvui.trackbar() expects aValue parameter to be a mutable object
     r.dynamic_energy_threshold = False
     cvui.init(WINDOW_NAME)
     frame = np.zeros((200, 600, 3), np.uint8)
