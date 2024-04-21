@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import speech_recognition as sr
 import cvui
+import audioop
 
 # Constants for the progress bar
 WINDOW_NAME = "Microphone Audio Levels"
@@ -12,22 +13,21 @@ BAR_Y = 50
 
 
 def calculate_rms(audio_data):
-    """
-    Calculates Root Mean Square (RMS) to quantify the
-    average amplitude of audio signal over time.
-    """
-    audio_np = np.frombuffer(audio_data.frame_data, dtype=np.int16).astype(np.float32)
+    audio_np = np.frombuffer(audio_data.frame_data, dtype=np.int16)
+    if len(audio_np) == 0:
+        return 0.0  # Return 0 if no audio data is available
+
     rms = np.sqrt(np.mean(np.square(audio_np)))
-    return rms
+    return rms if not np.isnan(rms) else 0.0  # Return 0 if RMS is NaN
 
 
 def draw_audio_bar(frame, rms):
     # Scale RMS to fit within the BAR_HEIGHT
     # Returns BAR_HEIGHT if calculated height exceeds BAR_HEIGHT
-    bar_height = int(min(rms / 5500 * BAR_HEIGHT, BAR_HEIGHT))
+    bar_height = int(min(rms/50*BAR_HEIGHT, BAR_HEIGHT))
     border_color = 0xC0C0C0  # Silver
     color = 0x008000  # Default bar color is green
-    if rms > 5000:
+    if rms > 15000:
         color = 0xFF0000  # Change to red if audio level is high
 
     # Outline of the audio bar
@@ -57,7 +57,8 @@ def main():
 
                 # Calculate RMS to visualize audio level
                 rms = calculate_rms(audio_data)
-
+                #rms=audioop.rms(audio_data.frame_data,1)
+                draw_audio_bar(frame, rms)
                 # Clear the frame
                 frame[:] = (49, 52, 49)
 
@@ -69,10 +70,11 @@ def main():
                 cvui.update()
 
                 # Draw the audio bar
-                draw_audio_bar(frame, rms)
+                
 
                 # Show the content
                 cvui.imshow(WINDOW_NAME, frame)
+                print("audio level: "+str(rms))
 
                 # Check for ESC key press to exit
                 if cv2.waitKey(20) == 27:
