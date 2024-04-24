@@ -18,13 +18,13 @@ def calculate_rms(audio_data):
         return 0.0  # Return 0 if no audio data is available
 
     rms = np.sqrt(np.mean(np.square(audio_np)))
-    return rms if not np.isnan(rms) else 0.0  # Return 0 if RMS is NaN
+    return rms if not np.isnan(rms) else 0.0  # Return 0 if rms is nan
 
 
 def draw_audio_bar(frame, rms):
     # Scale RMS to fit within the BAR_HEIGHT
     # Returns BAR_HEIGHT if calculated height exceeds BAR_HEIGHT
-    bar_height = int(min(rms/50*BAR_HEIGHT, BAR_HEIGHT))
+    bar_height = int(min(rms / 50 * BAR_HEIGHT, BAR_HEIGHT))
     border_color = 0xC0C0C0  # Silver
     color = 0x008000  # Default bar color is green
     if rms > 15000:
@@ -57,7 +57,7 @@ def main():
 
                 # Calculate RMS to visualize audio level
                 rms = calculate_rms(audio_data)
-                #rms=audioop.rms(audio_data.frame_data,1)
+                # rms=audioop.rms(audio_data.frame_data,1)
                 draw_audio_bar(frame, rms)
                 # Clear the frame
                 frame[:] = (49, 52, 49)
@@ -70,11 +70,10 @@ def main():
                 cvui.update()
 
                 # Draw the audio bar
-                
 
                 # Show the content
                 cvui.imshow(WINDOW_NAME, frame)
-                print("audio level: "+str(rms))
+                print("audio level: " + str(rms))
 
                 # Check for ESC key press to exit
                 if cv2.waitKey(20) == 27:
