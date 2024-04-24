@@ -7,7 +7,7 @@ import audioop
 # Constants for the progress bar
 WINDOW_NAME = "Energy Threshold & Microphone Audio Levels"
 BAR_WIDTH = 20
-BAR_HEIGHT = 300
+BAR_HEIGHT = 500
 BAR_X = 100
 BAR_Y = 50
 
@@ -19,16 +19,16 @@ def calculate_rms(audio_data):
 
     rms = np.sqrt(np.mean(np.square(audio_np)))
     return rms
-    return rms if not np.isnan(rms) else 0.0  # Return 0 if rms is NaN
+    # return rms if not np.isnan(rms) else 0.0  # Return 0 if rms is NaN
 
 
 def draw_audio_bar(frame, rms):
     # Scale RMS to fit within the BAR_HEIGHT
     # Returns BAR_HEIGHT if calculated height exceeds BAR_HEIGHT
-    bar_height = int(min(rms / 100 * BAR_HEIGHT, BAR_HEIGHT))
+    bar_height = int(min(rms, BAR_HEIGHT))
     border_color = 0xC0C0C0  # Silver
     color = 0x008000  # Default bar color is green
-    if rms > 100:
+    if rms > 500:
         color = 0xFF0000  # Change to red if audio level is high
 
     # Outline of the audio bar
