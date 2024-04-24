@@ -36,7 +36,7 @@ def draw_audio_bar(frame, rms):
     cvui.rect(frame, BAR_Y, BAR_X, bar_height, BAR_WIDTH, border_color, color)
     #print(f"bar_height={bar_height}")
 
-
+# Callback function in case use of cv2.createTrackbar
 def change_threshold(tValue):
     r = sr.Recognizer()
     r.energy_threshold = tValue
