@@ -26,7 +26,7 @@ def draw_audio_bar(frame, rms):
     bar_height = int(min(rms / 50 * BAR_HEIGHT, BAR_HEIGHT))
     border_color = 0xC0C0C0  # Silver
     color = 0x008000  # Default bar color is green
-    if rms > 15000:
+    if rms > 20000:
         color = 0xFF0000  # Change to red if audio level is high
 
     # Outline of the audio bar
