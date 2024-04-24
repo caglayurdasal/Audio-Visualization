@@ -2,6 +2,7 @@ import cv2
 import cvui
 import numpy as np
 import speech_recognition as sr
+import audioop
 
 # Constants for the progress bar
 WINDOW_NAME = "Energy Threshold & Microphone Audio Levels"
@@ -23,18 +24,19 @@ def calculate_rms(audio_data):
 def draw_audio_bar(frame, rms):
     # Scale RMS to fit within the BAR_HEIGHT
     # Returns BAR_HEIGHT if calculated height exceeds BAR_HEIGHT
-    bar_height = int(min(rms / 50 * BAR_HEIGHT, BAR_HEIGHT))
+    bar_height = int(min(rms / 10, BAR_HEIGHT))
     border_color = 0xC0C0C0  # Silver
     color = 0x008000  # Default bar color is green
-    if rms > 20000:
+    if rms > 30000:
         color = 0xFF0000  # Change to red if audio level is high
 
     # Outline of the audio bar
     cvui.rect(frame, BAR_Y, BAR_X, BAR_HEIGHT, BAR_WIDTH, border_color)
     # Draw the progress
     cvui.rect(frame, BAR_Y, BAR_X, bar_height, BAR_WIDTH, border_color, color)
+    #print(f"bar_height={bar_height}")
 
-
+# Callback function in case use of cv2.createTrackbar
 def change_threshold(tValue):
     r = sr.Recognizer()
     r.energy_threshold = tValue
@@ -47,22 +49,23 @@ def main():
     ]  # cvui.trackbar() expects aValue parameter to be a mutable object
     r.dynamic_energy_threshold = False
     cvui.init(WINDOW_NAME)
-    frame = np.zeros((200, 600, 3), np.uint8)
+    frame = np.zeros((200, 1000, 3), np.uint8)
 
     with sr.Microphone() as source:
         while True:
             try:
                 frame[:] = (49, 52, 49)
                 audio_data = r.listen(source, phrase_time_limit=0.5)
-                rms = calculate_rms(audio_data)
-
+                # rms = calculate_rms(audio_data)
+                rms = audioop.rms(audio_data.frame_data, 2)
+                print(f"rms={int(rms)}")
                 draw_audio_bar(frame, rms)
-                print(f"rms: {str(rms)}")
 
                 # Draw the trackbar and update the energy threshold
-                # if cvui.trackbar(frame, 50, 40, 500, energy_threshold, 100.0, 4000.0):
-                #     r.energy_threshold = energy_threshold[0]
-                cv2.createTrackbar("slider", WINDOW_NAME, 100, 4000, change_threshold)
+                if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
+                    r.energy_threshold = energy_threshold[0]
+                #cv2.createTrackbar("slider", WINDOW_NAME, 100, 4000, change_threshold)
+                print(f"energy_threshold={round(r.energy_threshold,1)}")
 
                 # Update components
                 cvui.update()
