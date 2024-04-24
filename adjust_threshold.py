@@ -6,7 +6,7 @@ import speech_recognition as sr
 # Constants for the progress bar
 WINDOW_NAME = "Energy Threshold & Microphone Audio Levels"
 BAR_WIDTH = 20
-BAR_HEIGHT = 500
+BAR_HEIGHT = 900
 BAR_X = 100
 BAR_Y = 50
 
@@ -33,6 +33,8 @@ def draw_audio_bar(frame, rms):
     cvui.rect(frame, BAR_Y, BAR_X, BAR_HEIGHT, BAR_WIDTH, border_color)
     # Draw the progress
     cvui.rect(frame, BAR_Y, BAR_X, bar_height, BAR_WIDTH, border_color, color)
+    print(f"bar_height={bar_height}")
+    print(f"rms={int(rms)}")
 
 
 def change_threshold(tValue):
@@ -47,7 +49,7 @@ def main():
     ]  # cvui.trackbar() expects aValue parameter to be a mutable object
     r.dynamic_energy_threshold = False
     cvui.init(WINDOW_NAME)
-    frame = np.zeros((200, 600, 3), np.uint8)
+    frame = np.zeros((200, 1000, 3), np.uint8)
 
     with sr.Microphone() as source:
         while True:
@@ -57,12 +59,12 @@ def main():
                 rms = calculate_rms(audio_data)
 
                 draw_audio_bar(frame, rms)
-                print(f"rms: {str(rms)}")
 
                 # Draw the trackbar and update the energy threshold
-                # if cvui.trackbar(frame, 50, 40, 500, energy_threshold, 100.0, 4000.0):
-                #     r.energy_threshold = energy_threshold[0]
-                cv2.createTrackbar("slider", WINDOW_NAME, 100, 4000, change_threshold)
+                if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 4000.0):
+                    r.energy_threshold = energy_threshold[0]
+                # cv2.createTrackbar("slider", WINDOW_NAME, 100, 4000, change_threshold)
+                print(f"energy_threshold={r.energy_threshold}")
 
                 # Update components
                 cvui.update()
