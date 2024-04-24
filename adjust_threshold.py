@@ -16,7 +16,10 @@ def calculate_rms(audio_data):
         return 0.0  # Return 0 if no audio data is available
 
     rms = np.sqrt(np.mean(np.square(audio_np)))
-    return rms if not np.isnan(rms) else 0.0  # Return 0 if RMS is NaN
+    if not np.isnan(rms):
+        return rms
+    else:
+        return 0.0  # Return 0 if rms value of nan
 
 
 def draw_audio_bar(frame, rms):
