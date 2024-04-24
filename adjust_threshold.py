@@ -18,17 +18,16 @@ def calculate_rms(audio_data):
         return 0.0  # Return 0 if no audio data is available
 
     rms = np.sqrt(np.mean(np.square(audio_np)))
-    return rms
-    # return rms if not np.isnan(rms) else 0.0  # Return 0 if rms is NaN
+    return rms if not np.isnan(rms) else 0.0  # Return 0 if rms is NaN
 
 
 def draw_audio_bar(frame, rms):
     # Scale RMS to fit within the BAR_HEIGHT
     # Returns BAR_HEIGHT if calculated height exceeds BAR_HEIGHT
-    bar_height = int(min(rms, BAR_HEIGHT))
+    bar_height = int(min(rms / 100, BAR_HEIGHT))
     border_color = 0xC0C0C0  # Silver
     color = 0x008000  # Default bar color is green
-    if rms > 500:
+    if rms > 30000:
         color = 0xFF0000  # Change to red if audio level is high
 
     # Outline of the audio bar
@@ -36,7 +35,6 @@ def draw_audio_bar(frame, rms):
     # Draw the progress
     cvui.rect(frame, BAR_Y, BAR_X, bar_height, BAR_WIDTH, border_color, color)
     print(f"bar_height={bar_height}")
-    print(f"rms={int(rms)}")
 
 
 def change_threshold(tValue):
@@ -59,11 +57,12 @@ def main():
                 frame[:] = (49, 52, 49)
                 audio_data = r.listen(source, phrase_time_limit=0.5)
                 # rms = calculate_rms(audio_data)
-                rms = audioop.rms(audio_data.frame_data, 2) / 200
+                rms = audioop.rms(audio_data.frame_data, 2)
+                print(f"rms={int(rms)}")
                 draw_audio_bar(frame, rms)
 
                 # Draw the trackbar and update the energy threshold
-                if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 4000.0):
+                if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
                     r.energy_threshold = energy_threshold[0]
                 # cv2.createTrackbar("slider", WINDOW_NAME, 100, 4000, change_threshold)
                 print(f"energy_threshold={round(r.energy_threshold,1)}")
