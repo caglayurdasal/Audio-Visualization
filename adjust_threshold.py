@@ -2,11 +2,12 @@ import cv2
 import cvui
 import numpy as np
 import speech_recognition as sr
+import audioop
 
 # Constants for the progress bar
 WINDOW_NAME = "Energy Threshold & Microphone Audio Levels"
 BAR_WIDTH = 20
-BAR_HEIGHT = 900
+BAR_HEIGHT = 300
 BAR_X = 100
 BAR_Y = 50
 
@@ -17,16 +18,17 @@ def calculate_rms(audio_data):
         return 0.0  # Return 0 if no audio data is available
 
     rms = np.sqrt(np.mean(np.square(audio_np)))
+    return rms
     return rms if not np.isnan(rms) else 0.0  # Return 0 if rms is NaN
 
 
 def draw_audio_bar(frame, rms):
     # Scale RMS to fit within the BAR_HEIGHT
     # Returns BAR_HEIGHT if calculated height exceeds BAR_HEIGHT
-    bar_height = int(min(rms / 50 * BAR_HEIGHT, BAR_HEIGHT))
+    bar_height = int(min(rms / 100 * BAR_HEIGHT, BAR_HEIGHT))
     border_color = 0xC0C0C0  # Silver
     color = 0x008000  # Default bar color is green
-    if rms > 15000:
+    if rms > 100:
         color = 0xFF0000  # Change to red if audio level is high
 
     # Outline of the audio bar
@@ -56,8 +58,8 @@ def main():
             try:
                 frame[:] = (49, 52, 49)
                 audio_data = r.listen(source, phrase_time_limit=0.5)
-                rms = calculate_rms(audio_data)
-
+                # rms = calculate_rms(audio_data)
+                rms = audioop.rms(audio_data.frame_data, 2) / 200
                 draw_audio_bar(frame, rms)
 
                 # Draw the trackbar and update the energy threshold
