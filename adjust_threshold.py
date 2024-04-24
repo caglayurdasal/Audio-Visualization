@@ -66,7 +66,7 @@ def main():
                 if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 4000.0):
                     r.energy_threshold = energy_threshold[0]
                 # cv2.createTrackbar("slider", WINDOW_NAME, 100, 4000, change_threshold)
-                print(f"energy_threshold={r.energy_threshold}")
+                print(f"energy_threshold={round(r.energy_threshold,1)}")
 
                 # Update components
                 cvui.update()
