@@ -13,7 +13,11 @@ This project provides real-time visualization of microphone audio levels using O
    - Dependencies: `opencv-python`, `speechrecognition`, `cvui`, `numpy`
 
 ## Installation
-
+0. Install OS-level dependencies:
+- Linux Mint (required for compiling the pyaudio module):
+   ```bash
+   sudo apt install portaudio19-dev
+   ```   
 1. Clone the repository:
    ```bash
    git clone git@github.com:caglayurdasal/Audio-Visualization.git
@@ -25,27 +29,22 @@ This project provides real-time visualization of microphone audio levels using O
    ```
 
 ## Usage
-0. Install OS-level dependencies:
-   - Linux Mint (required for compiling the pyaudio module):
-   ```bash
-   sudo apt install portaudio19-dev
-   ```   
 1. Run the desired script:
    ```bash
-   python3 microphone_audio_levels.py
+   python3 visualize_energy_level.py
    ```
    or
    ```bash
-   python3 energy_threshold_audio_levels.py
+   python3 adjust_threshold.py
    ```
-2. Adjust energy threshold levels as needed.
+2. Adjust energy threshold levels as needed using GUI.
 
 3. To quit the application, press the ESC key.
 
 ## References
 1. speech_recognition library reference for Recognizer class and energy threshold:
 - https://github.com/Uberi/speech_recognition/blob/master/reference/library-reference.rst#recognizer---recognizer
-3. Getting microphone input as source
+2. Getting microphone input as source
 - https://github.com/Uberi/speech_recognition/blob/master/examples/audio_transcribe.py
 3. Calculating the volume of the input with root mean square(rms):
 - https://github.com/jiaaro/pydub/blob/master/pydub/pyaudioop.py#L142
