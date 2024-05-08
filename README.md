@@ -50,6 +50,9 @@ This project provides real-time visualization of microphone audio levels using O
 - https://github.com/jiaaro/pydub/blob/master/pydub/pyaudioop.py#L142
 - https://stackoverflow.com/questions/9763471/audioop-rms-why-does-it-differ-from-normal-rms
 - https://docs.python.org/3/library/audioop.html#audioop.rms
+4. cvui/opencv library reference for trackbar:
+- https://github.com/Dovyski/cvui/blob/master/example/src/trackbar/trackbar.py
+- https://docs.opencv.org/4.x/da/d6a/tutorial_trackbar.html
 
       
    
