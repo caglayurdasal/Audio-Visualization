@@ -14,7 +14,7 @@ This project provides real-time visualization of microphone audio levels using O
 
 ## Installation
 0. Install OS-level dependencies:
-- Linux Mint (required for compiling the pyaudio module):
+   - Linux Mint (required for compiling the pyaudio module):
    ```bash
    sudo apt install portaudio19-dev
    ```   
