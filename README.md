@@ -13,6 +13,8 @@ This project provides real-time visualization of microphone audio levels using O
    - Dependencies: `opencv-python`, `speechrecognition`, `cvui`, `numpy`
 
 ## Installation
+Python Version Requirement:
+This project requires Python 3.10.
 0. Install OS-level dependencies:
    - Linux Mint (required for compiling the pyaudio module):
    ```bash
