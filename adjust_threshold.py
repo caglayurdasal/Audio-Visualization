@@ -4,6 +4,8 @@ import numpy as np
 import speech_recognition as sr
 import audioop
 import threading
+import os
+import sys
 
 # Constants for the progress bar
 WINDOW_NAME = "Energy Threshold & Microphone Audio Levels"
@@ -12,6 +14,13 @@ BAR_HEIGHT = 20
 BAR_X = 100
 BAR_Y = 100
 program_running = True
+
+
+def suppress_alsa_warnings():
+    # Suppress ALSA warnings by redirecting stderr
+    sys.stderr.flush()  # Flush the current stderr
+    new_stderr = open(os.devnull, "w")
+    os.dup2(new_stderr.fileno(), sys.stderr.fileno())
 
 
 def calculate_rms(audio_data):
@@ -91,6 +100,7 @@ def user_interface_thread(r):
 
 
 def main():
+    suppress_alsa_warnings()
     r = sr.Recognizer()
     r.dynamic_energy_threshold = False
 
