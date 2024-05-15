@@ -41,7 +41,8 @@ def change_threshold(tValue):
     r.energy_threshold = tValue
 
 
-def sr_thread(r, source, energy_threshold):
+def speech_recognition_thread(r, source, energy_threshold):
+    global frame
     while True:
         try:
             audio_data = r.listen(source, phrase_time_limit=0.5)
@@ -53,7 +54,7 @@ def sr_thread(r, source, energy_threshold):
             break
 
 
-def ui_thread(energy_threshold, frame, r):
+def user_interface_thread(energy_threshold, frame, r):
     while True:
         frame[:] = (49, 52, 49)
         if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
@@ -69,9 +70,7 @@ def ui_thread(energy_threshold, frame, r):
 
 def main():
     r = sr.Recognizer()
-    energy_threshold = [
-        r.energy_threshold
-    ]  # cvui.trackbar() expects aValue parameter to be a mutable object
+    energy_threshold = [r.energy_threshold]  # cvui.trackbar() expects aValue parameter to be a mutable object
     r.dynamic_energy_threshold = False
     cvui.init(WINDOW_NAME)
     global frame
@@ -79,20 +78,20 @@ def main():
 
     with sr.Microphone() as source:
         # Create threads for speech recognition and user interface
-        sr_thread = threading.Thread(
-            target=sr_thread, args=(r, source, energy_threshold)
+        sr_thread_instance = threading.Thread(
+            target=speech_recognition_thread, args=(r, source, energy_threshold)
         )
-        ui_thread = threading.Thread(
-            target=ui_thread, args=(energy_threshold, frame, r)
+        ui_thread_instance = threading.Thread(
+            target=user_interface_thread, args=(energy_threshold, frame, r)
         )
 
         # Start the threads
-        sr_thread.start()
-        ui_thread.start()
+        sr_thread_instance.start()
+        ui_thread_instance.start()
 
         # Wait for threads to finish
-        sr_thread.join()
-        ui_thread.join()
+        sr_thread_instance.join()
+        ui_thread_instance.join()
 
 
 if __name__ == "__main__":
