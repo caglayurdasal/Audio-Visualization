@@ -47,17 +47,18 @@ def draw_audio_bar(frame, rms):
     cvui.rect(frame, BAR_X, BAR_Y, bar_width, BAR_HEIGHT, border_color, color)
 
 
-def speech_recognition_thread(r, source, frame):
+def speech_recognition_thread(r, frame):
     global program_running
-    while program_running:
-        try:
-            audio_data = r.listen(source, phrase_time_limit=0.5)
-            rms = audioop.rms(audio_data.frame_data, 2)
-            print(f"rms={int(rms)}")
-            draw_audio_bar(frame, rms)
-        except KeyboardInterrupt:
-            print("Program terminated.\n")
-            break
+    with sr.Microphone() as source:
+        while program_running:
+            try:
+                audio_data = r.listen(source, phrase_time_limit=0.5)
+                rms = audioop.rms(audio_data.frame_data, 2)
+                print(f"rms={int(rms)}")
+                draw_audio_bar(frame, rms)
+            except Exception as e:
+                print(f"Error in speech_recognition_thread: {e}")
+                break
 
 
 def user_interface_thread(r):
@@ -92,8 +93,8 @@ def user_interface_thread(r):
                     program_running = False
                     break
 
-            except KeyboardInterrupt:
-                print("Program terminated.\n")
+            except Exception as e:
+                print(f"Error in user_interface_thread: {e}")
                 break
 
     cv2.destroyAllWindows()
@@ -101,13 +102,16 @@ def user_interface_thread(r):
 
 def main():
     suppress_alsa_warnings()
+    global program_running
     r = sr.Recognizer()
     r.dynamic_energy_threshold = False
+
+    frame = np.zeros((200, 1000, 3), np.uint8)
 
     # Create threads for speech recognition and user interface
     sr_thread = threading.Thread(
         target=speech_recognition_thread,
-        args=(r, sr.Microphone(), np.zeros((200, 1000, 3), np.uint8)),
+        args=(r, frame),
     )
     ui_thread = threading.Thread(target=user_interface_thread, args=(r,))
 
@@ -118,6 +122,8 @@ def main():
     # Wait for threads to finish
     sr_thread.join()
     ui_thread.join()
+
+    program_running = False
 
 
 if __name__ == "__main__":
