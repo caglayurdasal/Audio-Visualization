@@ -40,20 +40,23 @@ def draw_audio_bar(frame, rms):
     cvui.rect(frame, BAR_X, BAR_Y, bar_width, BAR_HEIGHT, border_color, color)
 
 
-def speech_recognition_thread(r, source, frame):
+def speech_recognition_thread(r, source, rms_data):
     global program_running
     while program_running:
         try:
             audio_data = r.listen(source, phrase_time_limit=0.5)
-            rms = audioop.rms(audio_data.frame_data, 2)
-            print(f"rms={int(rms)}")
-            draw_audio_bar(frame, rms)
+            current_rms = audioop.rms(audio_data.frame_data, 2)
+            rms_data.append(current_rms)  # add current rms value to list
+            if len(rms_data) > 1:
+                rms_data.pop(0)  # current rms value will be the only value in the list
+            print(f"rms={int(current_rms)}")
+
         except KeyboardInterrupt:
             print("Program terminated.\n")
             break
 
 
-def user_interface_thread(r, source, frame):
+def user_interface_thread(r, frame, rms_data):
     global program_running
     energy_threshold = [
         r.energy_threshold
@@ -63,10 +66,9 @@ def user_interface_thread(r, source, frame):
     while program_running:
         try:
             frame[:] = (49, 52, 49)
-            audio_data = r.listen(source, phrase_time_limit=0.5)
-            rms = audioop.rms(audio_data.frame_data, 2)
-            print(f"rms={int(rms)}")
-            draw_audio_bar(frame, rms)
+            if rms_data:
+                rms = rms_data[0]
+                draw_audio_bar(frame, rms)
 
             # Draw the trackbar and update the energy threshold
             if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
@@ -92,16 +94,16 @@ def user_interface_thread(r, source, frame):
 
 def main():
     r.dynamic_energy_threshold = False
-
+    rms_data = []  # rms values
     frame = np.zeros((200, 1000, 3), np.uint8)  # Shared frame
 
     with sr.Microphone() as source:  # Initialize the microphone once
         # Create threads for speech recognition and user interface
         sr_thread = threading.Thread(
-            target=speech_recognition_thread, args=(r, source, frame)
+            target=speech_recognition_thread, args=(r, source, rms_data)
         )
         ui_thread = threading.Thread(
-            target=user_interface_thread, args=(r, source, frame)
+            target=user_interface_thread, args=(r, frame, rms_data)
         )
 
         # Start the threads
