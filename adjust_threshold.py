@@ -4,8 +4,6 @@ import numpy as np
 import speech_recognition as sr
 import audioop
 import threading
-import os
-import sys
 
 # Constants for the progress bar
 WINDOW_NAME = "Energy Threshold & Microphone Audio Levels"
@@ -13,14 +11,9 @@ BAR_WIDTH = 500
 BAR_HEIGHT = 20
 BAR_X = 100
 BAR_Y = 100
+
 program_running = True
-
-
-def suppress_alsa_warnings():
-    # Suppress ALSA warnings by redirecting stderr
-    sys.stderr.flush()  # Flush the current stderr
-    new_stderr = open(os.devnull, "w")
-    os.dup2(new_stderr.fileno(), sys.stderr.fileno())
+r = sr.Recognizer()
 
 
 def calculate_rms(audio_data):
@@ -60,64 +53,64 @@ def speech_recognition_thread(r, source, frame):
             break
 
 
-def user_interface_thread(r):
+def user_interface_thread(r, source, frame):
     global program_running
     energy_threshold = [
         r.energy_threshold
     ]  # cvui.trackbar() expects aValue parameter to be a mutable object
     cvui.init(WINDOW_NAME)
-    frame = np.zeros((200, 1000, 3), np.uint8)
 
-    with sr.Microphone() as source:
-        while program_running:
-            try:
-                frame[:] = (49, 52, 49)
-                audio_data = r.listen(source, phrase_time_limit=0.5)
-                rms = audioop.rms(audio_data.frame_data, 2)
-                print(f"rms={int(rms)}")
-                draw_audio_bar(frame, rms)
+    while program_running:
+        try:
+            frame[:] = (49, 52, 49)
+            audio_data = r.listen(source, phrase_time_limit=0.5)
+            rms = audioop.rms(audio_data.frame_data, 2)
+            print(f"rms={int(rms)}")
+            draw_audio_bar(frame, rms)
 
-                # Draw the trackbar and update the energy threshold
-                if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
-                    r.energy_threshold = energy_threshold[0]
+            # Draw the trackbar and update the energy threshold
+            if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
+                r.energy_threshold = energy_threshold[0]
 
-                print(f"energy_threshold={round(r.energy_threshold,1)}")
+            print(f"energy_threshold={round(r.energy_threshold,1)}")
 
-                # Update components
-                cvui.update()
-                cv2.imshow(WINDOW_NAME, frame)
+            # Update components
+            cvui.update()
+            cv2.imshow(WINDOW_NAME, frame)
 
-                if cv2.waitKey(20) == 27:
-                    print("ESC pressed.")
-                    program_running = False
-                    break
-
-            except KeyboardInterrupt:
-                print("Program terminated.\n")
+            if cv2.waitKey(20) == 27:
+                print("ESC pressed.")
+                program_running = False
                 break
+
+        except KeyboardInterrupt:
+            print("Program terminated.\n")
+            break
 
     cv2.destroyAllWindows()
 
 
 def main():
-    suppress_alsa_warnings()
-    r = sr.Recognizer()
     r.dynamic_energy_threshold = False
 
-    # Create threads for speech recognition and user interface
-    sr_thread = threading.Thread(
-        target=speech_recognition_thread,
-        args=(r, sr.Microphone(), np.zeros((200, 1000, 3), np.uint8)),
-    )
-    ui_thread = threading.Thread(target=user_interface_thread, args=(r,))
+    frame = np.zeros((200, 1000, 3), np.uint8)  # Shared frame
 
-    # Start the threads
-    sr_thread.start()
-    ui_thread.start()
+    with sr.Microphone() as source:  # Initialize the microphone once
+        # Create threads for speech recognition and user interface
+        sr_thread = threading.Thread(
+            target=speech_recognition_thread, args=(r, source, frame)
+        )
+        ui_thread = threading.Thread(
+            target=user_interface_thread, args=(r, source, frame)
+        )
 
-    # Wait for threads to finish
-    sr_thread.join()
-    ui_thread.join()
+        # Start the threads
+        sr_thread.start()
+        ui_thread.start()
+
+        # Wait for threads to finish
+        sr_thread.join()
+        ui_thread.join()
 
 
 if __name__ == "__main__":
