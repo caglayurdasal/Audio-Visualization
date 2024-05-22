@@ -46,9 +46,10 @@ def speech_recognition_thread(r, source, rms_data):
         try:
             audio_data = r.listen(source, phrase_time_limit=0.5)
             current_rms = audioop.rms(audio_data.frame_data, 2)
-            rms_data.append(current_rms)  # add current rms value to list
+            rms_data.insert(0, current_rms)  # add current rms value to list
+            # remove the last value on the list if len>1
             if len(rms_data) > 1:
-                rms_data.pop(0)  # current rms value will be the only value in the list
+                rms_data.pop(1)  # pop ensures len(list)=1
             print(f"rms={int(current_rms)}")
 
         except KeyboardInterrupt:
@@ -73,8 +74,6 @@ def user_interface_thread(r, frame, rms_data):
             # Draw the trackbar and update the energy threshold
             if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
                 r.energy_threshold = energy_threshold[0]
-
-            print(f"energy_threshold={round(r.energy_threshold,1)}")
 
             # Update components
             cvui.update()
