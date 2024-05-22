@@ -45,6 +45,8 @@ This project requires Python 3.10.
 3. To quit the application, press the ESC key.
 
 ## References
+0. About ALSA warnings: 
+- https://blog.yjl.im/2012/11/pyaudio-portaudio-and-alsa-messages.html
 1. speech_recognition library reference for Recognizer class and energy threshold:
 - https://github.com/Uberi/speech_recognition/blob/master/reference/library-reference.rst#recognizer---recognizer
 2. Getting microphone input as source
