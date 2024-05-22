@@ -56,6 +56,8 @@ This project requires Python 3.10.
 4. cvui/opencv library reference for trackbar:
 - https://github.com/Dovyski/cvui/blob/master/example/src/trackbar/trackbar.py
 - https://docs.opencv.org/4.x/da/d6a/tutorial_trackbar.html
-
+5. Multithreading:
+- https://stackoverflow.com/questions/19790570/using-a-global-variable-with-a-thread
+- https://stackoverflow.com/questions/40581649/passing-multiple-arguments-in-python-thread
       
    
