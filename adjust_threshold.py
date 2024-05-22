@@ -5,7 +5,7 @@ import speech_recognition as sr
 import audioop
 import threading
 
-# Constants for the progress bar
+# constants for the progress bar
 WINDOW_NAME = "Energy Threshold & Microphone Audio Levels"
 BAR_WIDTH = 500
 BAR_HEIGHT = 20
@@ -19,29 +19,29 @@ r = sr.Recognizer()
 def calculate_rms(audio_data):
     audio_np = np.frombuffer(audio_data.frame_data, dtype=np.int16)
     if len(audio_np) == 0:
-        return 0.0  # Return 0 if no audio data is available
+        return 0.0  # return 0 if no audio data is available
 
     rms = np.sqrt(np.mean(np.square(audio_np)))
-    return rms if not np.isnan(rms) else 0.0  # Return 0 if rms is NaN
+    return rms if not np.isnan(rms) else 0.0  # return 0 if rms is NaN
 
 
 def draw_audio_bar(frame, rms):
-    # Scale RMS to fit within the BAR_HEIGHT
-    # Returns BAR_HEIGHT if calculated height exceeds BAR_HEIGHT
+    # scale RMS to fit within the BAR_HEIGHT
+    # returns BAR_HEIGHT if calculated height exceeds BAR_HEIGHT
     bar_width = int(min(rms / 100, BAR_WIDTH))
     border_color = 0xC0C0C0
     color = 0x008000  # Default bar color is green
     if rms > 30000:
         color = 0xFF0000  # Change to red if audio level is high
 
-    # Outline of the audio bar
+    # outline of the audio bar
     cvui.rect(frame, BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT, border_color)
-    # Draw the progress
+    # draw the progress
     cvui.rect(frame, BAR_X, BAR_Y, bar_width, BAR_HEIGHT, border_color, color)
 
 
 def speech_recognition_thread(r, source, rms_data):
-    global program_running
+    global program_running  # ensure threads share program_running
     while program_running:
         try:
             audio_data = r.listen(source, phrase_time_limit=0.5)
@@ -71,11 +71,11 @@ def user_interface_thread(r, frame, rms_data):
                 rms = rms_data[0]
                 draw_audio_bar(frame, rms)
 
-            # Draw the trackbar and update the energy threshold
+            # draw the trackbar and update the energy threshold
             if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
                 r.energy_threshold = energy_threshold[0]
 
-            # Update components
+            # update components
             cvui.update()
             cv2.imshow(WINDOW_NAME, frame)
 
@@ -94,10 +94,10 @@ def user_interface_thread(r, frame, rms_data):
 def main():
     r.dynamic_energy_threshold = False
     rms_data = []  # rms values
-    frame = np.zeros((200, 1000, 3), np.uint8)  # Shared frame
+    frame = np.zeros((200, 1000, 3), np.uint8)  # frame is shared across threads
 
-    with sr.Microphone() as source:  # Initialize the microphone once
-        # Create threads for speech recognition and user interface
+    with sr.Microphone() as source:  # initialize the microphone once to ensure sharing across threads
+        # create threads for speech recognition and user interface
         sr_thread = threading.Thread(
             target=speech_recognition_thread, args=(r, source, rms_data)
         )
@@ -105,7 +105,6 @@ def main():
             target=user_interface_thread, args=(r, frame, rms_data)
         )
 
-        # Start the threads
         sr_thread.start()
         ui_thread.start()
 
