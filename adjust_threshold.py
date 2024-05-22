@@ -72,7 +72,7 @@ def user_interface_thread(r, frame, rms_data):
                 draw_audio_bar(frame, rms)
 
             # draw the trackbar and update the energy threshold
-            if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 10000.0):
+            if cvui.trackbar(frame, 50, 40, 900, energy_threshold, 100.0, 20000.0):
                 r.energy_threshold = energy_threshold[0]
 
             # update components
@@ -108,7 +108,7 @@ def main():
         sr_thread.start()
         ui_thread.start()
 
-        # Wait for threads to finish
+        # wait for threads to finish
         sr_thread.join()
         ui_thread.join()
 
